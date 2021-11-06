@@ -103,7 +103,7 @@ animations {
   flip_vertical: 0
 }
 animations {
-  id: "redButtonPressed"
+  id: "pressedButton"
   images {
     image: "/main/images/redButtonPressed.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF

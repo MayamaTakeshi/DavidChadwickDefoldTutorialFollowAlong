@@ -1,7 +1,7 @@
 script: "/main/scriptsRepository/main_menu.gui_script"
 fonts {
-  name: "cuntrimsRegular"
-  font: "/main/fonts/cuntrimsRegular.font"
+  name: "cutrimsRegular"
+  font: "/main/fonts/cutrimsRegular.font"
 }
 textures {
   name: "graphicAssets"
@@ -155,7 +155,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Leve1 - CityScape"
-  font: "cuntrimsRegular"
+  font: "cutrimsRegular"
   id: "text1"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -272,7 +272,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Level2 - ForrestScape"
-  font: "cuntrimsRegular"
+  font: "cutrimsRegular"
   id: "text2"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
