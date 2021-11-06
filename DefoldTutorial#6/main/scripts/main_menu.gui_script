@@ -1,0 +1,325 @@
+--[[  Defold Tutorial # 6:  Animated Graphic User Interface
+=============================================================================================
+
+Lua Script File:  	main_menu.gui_script
+
+Script Summary: Provides control over the main_menu Graphic User Interface (GUI) -- which
+includes the opening SplashScreens and the Play Selection Menu.   This
+script includes the following features:
+
+-  Display of the Introductory Splashscreens
+-  Button Press/Release Animations
+-  User Notifications related to Game Progress/Game Over
+
+
+Reference:			Defold Menu Example:  https://www.defold.com/tutorials/main-menu/
+
+=============================================================================================
+--]]
+
+-- Declare GLOBAL Variable
+BYPASS_SPLASH = false   		-- Used to turn-off the display of opening Splash Screen
+
+
+-- ------------------------------------------------------------------------------------------
+-- Declare a set of Local Functions 
+-- ------------------------------------------------------------------------------------------
+
+-- A cascade of SplashScreen Animation Functions starting with animateLogos()
+
+local function completeSplash()
+	print("Executing completeSplash")
+	msg.post("/controller#main_controller", "splashComplete")
+end
+
+local function animateLogos6(self)
+	-- Get the current color and set alpha to 0 as a basis for fading out
+	local to_color = gui.get_color(self.gameLogo)
+	to_color.w = 0
+	local delay = 3.0
+
+	-- Animate the alpha value from 1 to 0
+	gui.animate(self.gameLogo, gui.PROP_COLOR, to_color, gui.EASING_IN, 1.5,
+	delay, completeSplash)
+end
+
+local function animateLogos5(self)
+	print("Executing animateLogos5")
+	-- Animates scale to 100%
+	local s = 1.0
+	gui.animate(self.gameLogo, gui.PROP_SCALE, vmath.vector4(s, s, s, 0), gui.EASING_INOUT, 1.4,
+	0, animateLogos6)
+end
+
+local function animateLogos4(self)
+
+	-- Set Animation Delay
+	local d = 2.0
+	print ("Executing animateLogos4")
+	-- Get the current color and set alpha to 0 as a basis for fading up
+	local to_color = gui.get_color(self.gameLogo)
+	to_color.w = 1.0
+
+	-- Animate the alpha value from 0 to 1
+	gui.animate(self.gameLogo, gui.PROP_COLOR, to_color, gui.EASING_IN, 1.5, d)
+
+	-- Animate the scale up to 120%
+	local s = 1.2
+	gui.animate(self.gameLogo, gui.PROP_SCALE, vmath.vector4(s, s, s, 0), gui.EASING_IN, 3.0,
+	d, animateLogos5)
+
+end	
+
+local function animateLogos3(self)
+	print("Executing animateLogos3")
+	-- Get the current color and set alpha to 0 as a basis for fading up
+	--local from_color = gui.get_color(node)
+	local to_color = gui.get_color(self.TSLogo)
+	to_color.w = 0
+	local delay = 2.0
+
+	-- Animate the alpha value from 1 to 0
+	gui.animate(self.TSLogo, gui.PROP_COLOR, to_color, gui.EASING_IN, 0.5, delay,
+	animateLogos4)
+
+end
+
+local function animateLogos2(self)
+	print("Executing animateLogos2")
+	-- Animates scale to 100%
+	local s = 1.0
+	gui.animate(self.TSLogo, gui.PROP_SCALE, vmath.vector4(s, s, s, 0), gui.EASING_INOUT, 0.4,
+	0, animateLogos3)
+end	
+
+local function animateLogos(self)
+	print("Executing animateLogos")
+	-- Set Animation Delay
+	local d = 0.75
+	-- Change Scale to reduce size
+	local start_scale = 0.0001
+
+	gui.set_scale(self.gameLogo, vmath.vector4(start_scale, start_scale, start_scale, 0))
+	gui.set_scale(self.TSLogo, vmath.vector4(start_scale, start_scale, start_scale, 0))
+
+	-- Get the current color and set alpha to 0 as a basis for fading up
+	local from_color = gui.get_color(self.TSLogo)
+	local to_color = gui.get_color(self.TSLogo)
+	from_color.w = 0
+	gui.set_color(self.TSLogo, from_color)
+
+	-- Animate the alpha value from 0 to 1
+	gui.animate(self.TSLogo, gui.PROP_COLOR, to_color, gui.EASING_IN, 1.5, d)
+
+	-- Animate the scale up to 135%
+	local s = 1.35
+	gui.animate(self.TSLogo, gui.PROP_SCALE, vmath.vector4(s, s, s, 0), gui.EASING_IN, 4,
+	d, animateLogos2)
+end
+
+-- ------------------------------------------------------------------------------------------
+
+-- A cascade of Button Animation Functions starting with animateButton()
+
+local function animateButton2(self, node)
+	-- Animates scale back up to 100%
+	local s = 1
+	gui.animate(node, gui.PROP_SCALE, vmath.vector4(s, s, s, 0), gui.EASING_INOUT, 0.25, 0)
+end
+
+
+local function animateButton(node, d)
+
+	print("Executing animateButton")
+	-- Change Scale to reduce size
+	local start_scale = 0.5
+	gui.set_scale(node, vmath.vector4(start_scale, start_scale, start_scale, 0))
+
+	-- Get the current color and set alpha to 0 as a basis for fading up
+	local from_color = gui.get_color(node)
+	local to_color = gui.get_color(node)
+	from_color.w = 0
+	gui.set_color(node, from_color)
+
+	-- Animate the alpha value from 0 to 1
+	gui.animate(node, gui.PROP_COLOR, to_color, gui.EASING_IN, 0.2, d)
+
+	-- Animate the scale up to 120% and call animateButton2 when complete
+	local s = 1.2
+	gui.animate(node, gui.PROP_SCALE, vmath.vector4(s, s, s, 0),
+	gui.EASING_IN, 0.2, d, animateButton2)
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- Declare a Local Variable -- popupActive
+-- ------------------------------------------------------------------------------------------
+
+-- PopupActive is set to true when the popupWindow is being displayed; and reset to false 
+-- once that popup is inactivated -- used to prevent redundant clicking of a button while 
+-- the level is being setup
+
+local popupActive = false
+
+
+-- ------------------------------------------------------------------------------------------
+-- init() 
+-- ------------------------------------------------------------------------------------------
+
+function init(self)
+	-- Acquires Input Focus
+	msg.post(".", "acquire_input_focus")
+
+	-- Create Script Properties for each Node in the GUI
+	self.splashBackground = gui.get_node("splashBackground")
+	self.TSLogo = gui.get_node("TSLogo")
+	self.gameLogo = gui.get_node("gameLogo")
+
+	self.selectLevel1 = gui.get_node("selectLevel1")
+	self.selectLevel2 = gui.get_node("selectLevel2")
+	self.exitButton = gui.get_node("exitButton")
+
+	self.level1Selected = gui.get_node("level1Selected")
+	self.level2Selected = gui.get_node("level2Selected")
+	self.selectedLevelText = gui.get_node("selectedLevelText")
+
+	-- Start the Animations for the Studio and Game Logos
+	if BYPASS_SPLASH == false then
+		animateLogos(self)
+
+	elseif BYPASS_SPLASH == true then
+		msg.post("/controller#main_controller", "splashComplete")
+	end
+
+	-- Disable Active Game GUI Nodes until SplashScreen is complete
+	gui.set_enabled(self.selectLevel1, false)
+	gui.set_enabled(self.selectLevel2, false)
+	gui.set_enabled(self.exitButton, false)
+
+	gui.set_enabled(self.level1Selected, false)
+	gui.set_enabled(self.level2Selected, false)
+	gui.set_enabled(self.selectedLevelText, false)
+
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- on_input() 
+-- ------------------------------------------------------------------------------------------
+
+function on_input(self, action_id, action)
+
+	-- Process the clicking of the Select Level 1 Button (if the popup window is inactive)
+	if action.pressed and gui.pick_node(gui.get_node("selectLevel1"), action.x, action.y)
+	and popupActive == false then
+		-- Change the button image to 'buttonPressed' when a user clicks the button
+		gui.play_flipbook(self.selectLevel1, hash("blueButton_Pressed"))
+	end
+
+	if action.released and gui.pick_node(gui.get_node("selectLevel1"), action.x, action.y) then
+		-- Changes the button image to 'buttonReleased' when the user releases the mouse button
+		gui.play_flipbook(self.selectLevel1, hash("blueButton_Released"))
+
+		-- Processes if the popup window is inactive
+		if popupActive == false then
+			-- Set the flag to true to prevent double-clicks
+			popupActive = true
+
+			-- Initiate an animation to change the transparency of the level1Selected GUI node
+			-- (the popup window) to 1
+			gui.animate(self.level1Selected, "color", vmath.vector4(1, 1, 1, 1),
+			gui.EASING_LINEAR, 5, 0.5, confirmEnd, gui.PLAYBACK_ONCE_PINGPONG)
+
+			-- Send a message to the main.script indicating that level 1 can be started
+			msg.post("/controller#main_controller", "start_level1")
+
+			-- Set the user notification to reflect Level 1 as active
+			gui.set_text(self.selectedLevelText, "Active Level is now:  1")
+		end
+	end
+
+	-- Process the clicking of the Select Level 2 Button (if the popup window is inactive)
+	if action.pressed and gui.pick_node(self.selectLevel2, action.x, action.y)
+	and popupActive == false then
+		gui.play_flipbook(self.selectLevel2, hash("blueButton_Pressed"))
+	end
+
+	if action.released and gui.pick_node(self.selectLevel2, action.x, action.y) then
+		gui.play_flipbook(self.selectLevel2, hash("blueButton_Released"))
+
+		if popupActive == false then
+			popupActive = true
+			gui.animate(self.level2Selected, "color", vmath.vector4(1, 1, 1, 1),
+			gui.EASING_LINEAR, 5, 0.5, confirmEnd, gui.PLAYBACK_ONCE_PINGPONG)
+			msg.post("/controller#main_controller", "start_level2")
+			gui.set_text(self.selectedLevelText, "Active Level is now:  2")
+		end
+	end
+
+
+	-- Process User Selection of the  Button to Transition to Game Exit Confirmation Panel
+	if action.pressed and gui.pick_node(self.exitButton, action.x, action.y) then
+		if gui.is_enabled(self.exitButton) then
+			gui.play_flipbook(self.exitButton, hash("blueButton_Pressed"))
+		end
+	end
+
+	if action.released and gui.pick_node(self.exitButton, action.x, action.y) then
+
+		gui.play_flipbook(self.exitButton, hash("blueButton_Released"))
+
+		-- Activate the Exit Confirmation GUI Set
+		msg.post("/controller#main_controller", "exitGame")
+
+		-- Release Input Focus on the Main Menu and Disable the Main Menu Nodes
+		gui.set_enabled(self.selectLevel1, false)
+		gui.set_enabled(self.selectLevel2, false)
+		gui.set_enabled(self.exitButton, false)
+
+		gui.set_enabled(self.level1Selected, false)
+		gui.set_enabled(self.level2Selected, false)
+		gui.set_enabled(self.selectedLevelText, false)
+
+
+	end	
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- on_message() 
+-- ------------------------------------------------------------------------------------------
+
+function on_message(self, message_id, message, sender)
+
+	if message_id == hash("startGame") then
+
+		print("Executing msg: startGame")
+
+		gui.set_enabled(self.splashBackground, false)
+		gui.set_enabled(self.TSLogo, false)
+		gui.set_enabled(self.gameLogo, false)
+		gui.set_enabled(self.selectLevel1, true)
+		gui.set_enabled(self.selectLevel2, true)
+		gui.set_enabled(self.level1Selected, true)
+		gui.set_enabled(self.level2Selected, true)
+		gui.set_enabled(self.exitButton, true)
+		gui.set_enabled(self.selectedLevelText, true)
+
+		-- Animates the display of each menu button, with a short delay between them
+		animateButton(self.exitButton, 1.3)
+		animateButton(self.selectLevel2, 0.8)
+		animateButton(self.selectLevel1, 0.5)
+
+
+
+
+	end
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- A function for reseting the popupActive local variable
+
+function confirmEnd()
+	popupActive = false
+end

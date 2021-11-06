@@ -1,0 +1,71 @@
+--[[  Defold Tutorial # 6:  Animated Graphic User Interface
+=============================================================================================
+
+Lua Script File:  	main_controller.script
+
+Script Summary: Provides the general support functions related to game actions.   This
+script includes the following features:
+
+-  Initialization of game parameters, by level
+-  Game Setup Routine, to include spawning of game objects
+-  Provides gameplay coordination between major game entities 
+
+=============================================================================================
+--]]
+
+-- Declare Local Variables
+local currentLevel = 0
+
+
+-- ------------------------------------------------------------------------------------------
+-- Local Functions
+
+local function gameSetup(self)
+
+	-- Stub -- This is where you would re-initialize game parameters and start any
+	--         game object spawning actions
+
+end
+
+
+-- ------------------------------------------------------------------------------------------
+
+
+function on_message(self, message_id, message, sender)
+
+	-- Process Inbound Messages
+
+	-- Starts game setup when the SplashScreen sequence is completed
+	if message_id == hash("splashComplete") then
+		print("Processing msg: splashComplete within main.script")
+		--msg.post("/main", "startGame")
+		msg.post("/mainMenu#main_menu", "startGame")
+		gameSetup(self)
+
+		-- When main receives the 'start_level1' message (posted by the GUI) -- it sets the local 
+		-- variable to the current level and prints a message to the console
+	elseif message_id == hash("start_level1") then
+
+		currentLevel = 1
+
+		-- Code would be added here for Level 1 Functionality
+		print("executing on_message currentLevel1")
+
+		-- When main receives the 'start_level2' message (posted by the GUI) -- it sets the local 
+		-- variable to the current level and prints a message to the console			
+	elseif message_id == hash("start_level2") then
+
+		currentLevel = 2
+
+		-- Code would be added here for Level 2 Functionality
+		print("executing on_message currentLevel2")
+
+		-- When main receives the exitGame message - it closes and exits the game
+	elseif message_id == hash("exitGame") then
+		print ("Exiting the Game")
+		msg.post("@system:", "exit", {code = 0})
+
+	end    
+end
+
+-- ------------------------------------------------------------------------------------------
