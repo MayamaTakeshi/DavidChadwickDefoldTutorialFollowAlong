@@ -1,0 +1,14 @@
+--[[  Defold Tutorial # 5:  Physics Engine Techniques
+=============================================================================================
+
+Lua Script File:  floorActions.script
+
+Script Summary: This script captures the ID of the floor game object -- as a Control Variable.
+
+=============================================================================================
+--]]
+
+function init(self)
+	-- Add initialization code here
+	floorID = go.get_id()
+end

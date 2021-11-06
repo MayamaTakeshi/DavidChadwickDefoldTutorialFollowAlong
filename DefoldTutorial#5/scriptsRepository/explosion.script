@@ -1,0 +1,31 @@
+--[[  Defold Tutorial # 5:  Physics Engine Techniques
+=============================================================================================
+
+Lua Script File:  explosion.script
+
+Script Summary: This script is executed upon the spawning of each new explosion game object
+
+1 - It initiates the play_animation "explosion"
+2 - When the animation is complete, it deletes the game object
+
+=============================================================================================
+--]]
+
+function init(self)
+	-- Print a Debug Message to indicate that an explosion GO has been spawned
+	print("explosion has been spawned")
+
+	-- Send a message to the GO's sprite to start the 'explosion' animation
+	msg.post("#sprite", "play_animation", {id=hash("explosion")})
+end
+
+
+function on_message(self, message_id, message, sender)
+
+	-- When the 'explosion' animation is complete, the 'animation_done' message is processed
+	-- deleting the game object
+	if message_id == hash("animation_done") then
+		print("explosionScript: deleting explosion GO")
+		go.delete()	
+	end	
+end

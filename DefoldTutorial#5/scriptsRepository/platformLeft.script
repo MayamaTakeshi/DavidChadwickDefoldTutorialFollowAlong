@@ -1,0 +1,18 @@
+--[[  Defold Tutorial # 5:  Physics Engine Techniques
+=============================================================================================
+
+Lua Script File:  platformLeft.script
+
+Script Summary: This script provides the initialization routine which will set in motion 
+go.animate function which moves the game object back and forth on the x-axis 
+	by 100 pixels for the duration of the game.
+
+	============================================================================================= 
+	--]]
+
+	function init(self)
+		-- Initiates an animation of the left side of the stage;
+		-- moving the platform back and forth 100 pixels every 5 seconds
+		local xPos = go.get_position().x
+		go.animate('.', "position.x", go.PLAYBACK_LOOP_PINGPONG, xPos - 100, go.EASING_LINEAR, 5)
+	end

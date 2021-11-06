@@ -1,0 +1,58 @@
+--[[  Defold Tutorial # 5:  Physics Engine Techniques
+=============================================================================================
+
+Lua Script File:  boxScript.script
+
+Script Summary: This script performs several functions for a crate game object:
+
+1 - It provides a message which displays the current position of the crate as it falls
+2 - When it collides with the floor, it sets off an explosion animation
+3 - After colliding with the floor, the game object is deleted
+
+=============================================================================================
+--]]
+
+-- Define a script property for the cratePrototype
+go.property("deleting", false) -- Game Object control to prevent duplicative deletion actions 	
+
+-- -------------------------------------------------------------------------------------------	
+
+function update(self, dt)	
+	-- Determine the current box Game Object location and generate a message on top 
+	-- of the box sprite displaying the x/y position
+	local xPos = math.floor(go.get_position().x)
+	local yPos = math.floor(go.get_position().y)
+
+	msg.post("@render:", "draw_text", { text = "x: " .. xPos .. "  y: " 
+	.. yPos, position = vmath.vector3(xPos-55, yPos + 75, 0) } )
+	msg.post("@render:", "draw_text", { text = "deleted: " .. tostring(self.deleting), 
+	position = vmath.vector3(xPos-55, yPos + 95, 0) } )		
+end
+
+-- -------------------------------------------------------------------------------------------	
+
+function on_message(self, message_id, message, sender)
+
+	-- Process executed when the Crate has collided...with the floor
+	if message_id == hash("collision_response") and message.other_id == floorID then
+
+		-- Upon initial collision, delete the Game Object
+		-- Avoid duplicate deletions by using the self.deleting control variable
+		if self.deleting == false then
+			self.deleting = true	
+
+			-- Delete the Game Object upon hitting the floor
+			go.delete()
+
+			-- Spawn an Explosion at the current Box Position
+			local boxPos = go.get_position()
+			local explosion = factory.create("/createExplosion#factory", 
+			boxPos, nil, {}, 0.25)
+
+			-- Update a Global Variable to reflect number of crates hitting the floor
+			crateHitFloor = crateHitFloor + 1
+		end	
+	end	
+end
+
+-- -------------------------------------------------------------------------------------------

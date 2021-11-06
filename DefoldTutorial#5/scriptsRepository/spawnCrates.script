@@ -1,0 +1,20 @@
+--[[  Defold Tutorial # 5:  Physics Engine Techniques
+=============================================================================================
+
+Lua Script File:  spawnCrates.script
+
+Script Summary: This script initializes a set of global crate count variables
+
+=============================================================================================
+--]]
+
+
+function init(self)
+
+	-- The total number of Crates which have been spawned
+	crateCount = 0
+
+	-- The total number of Crates that have collided with the bottom floor
+	crateHitFloor = 0
+
+end
