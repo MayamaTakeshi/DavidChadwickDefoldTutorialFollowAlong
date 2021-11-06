@@ -1,0 +1,7 @@
+
+go.property("speed", 4)
+
+function init(self)
+	-- Rotate the planet around the z-axis on a loop -using the Script Property speed
+	go.animate(".", "euler.z", go.PLAYBACK_LOOP_FORWARD, 360, go.EASING_LINEAR, 60/self.speed)
+end

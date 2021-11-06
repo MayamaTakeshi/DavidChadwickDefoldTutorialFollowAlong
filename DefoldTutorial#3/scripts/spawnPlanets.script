@@ -1,0 +1,26 @@
+function init(self)
+	-- Establish a Random Seed so that random numbers are different each timer
+	math.randomseed(os.time())
+
+	-- Capture the game world dimensions form the game.project file
+	local gameWidth = tonumber(sys.get_config("display.width"))	
+	local gameHeight = tonumber(sys.get_config("display.height"))
+
+	-- Echo the game world dimensions to the console
+	print("gameWidth: " .. tostring(gameWidth) .. " gameHeight: " .. tostring(gameHeight))
+
+	-- Spanw ten Game Objects located at random locations within the game world
+	for i = 1, 10 do
+		-- set a Script Property which is the id number of the planed to be spawned
+		self.id = tostring(i)
+
+		-- Determined a random x and y position to place each Planed -- 100 pixels from the edge 
+		local x1 = math.random(100, gameWidth-100)
+		local y1 = math.random(100, gameHeight-100)
+		local pos = vmath.vector3(x1, y1, 1)
+
+		factory.create("#factory", pos, nil, {}, 1)
+
+		print("Spawning Planet: " .. self.id .. "x1:" .. tostring(x1) .. " y1:" .. tostring(y1))
+	end
+end
