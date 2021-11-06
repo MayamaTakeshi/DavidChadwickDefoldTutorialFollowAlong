@@ -11,6 +11,6 @@ If you run into trouble, help is available in [our forum](https://forum.defold.c
 Happy Defolding!
 
 
-Attribution: The images used in this tutorial are all free assets provided by the following sources: (1) background image is from www.1001freedownloads.com; (2) the buttons are from www.uichest.com; and (3) the popup border is provided by www.clipartbest.com. We thank these sites for providing these graphics.
+Attribution: The images used within this tutorial are all free assets provided by the following sources: (1) background images are from www.clipartkid.com; (2) the Wizard and Ork are provided by www.craftpix.net; (3) the Monkey is provided by www.gameartguppy.com and (4) the Level Select Panel is from www.freepik.com. We thank these sites for providing these free graphic assets.
 
 ---

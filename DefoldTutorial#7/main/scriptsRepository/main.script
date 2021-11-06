@@ -1,0 +1,84 @@
+--[[  Defold Tutorial #7:  Level and Menu Procedures - 1024 x 768
+=============================================================================================
+
+Lua Script File:  	main.script
+
+Script Summary: Provides the general support functions related to game actions.   This
+script includes the following features:
+
+-  	Initializes the GameState and sets main menu as the opening game level
+-  	Serves as the Controller between the main menu, Level1 and Level2 (loading/unloading
+collections; enabling/disabling GUIs and message control between game levels.
+
+=============================================================================================
+--]]
+
+
+-- ------------------------------------------------------------------------------------------
+-- Initialization 
+-- ------------------------------------------------------------------------------------------
+function init(self)	
+	-- Set the main menu as the starting Game Level for this application
+	msg.post(".", "start_main_menu")
+
+	-- Set a Script Property with the initial GameState Status
+	self.state = "MAIN_MENU"			
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- Message Processing  
+-- ------------------------------------------------------------------------------------------
+function on_message(self, message_id, message, sender)
+
+	-- When setting the GameState to Main Menu -- unload the Level1 and Level2 Collections 
+	-- via their proxies and enable the MainMenu GUI
+	if message_id == hash("start_main_menu") then
+		if self.state ~= "MAIN_MENU" then
+			-- Upon receipt of a 'to_main_menu' message -- ensure that the 
+			-- Level1 and Level2 collections are unloaded		
+			if self.state == "GAME1_RUNNING" then
+				msg.post("#level1_proxy", "unload")
+			end
+
+			if self.state == "GAME2_RUNNING" then
+				msg.post("#level2_proxy", "unload")
+			end
+
+		end
+
+		-- Enable both the Main Menu and the Menu Panel Background
+		msg.post("#main_menu", "enable")
+		self.state = "MAIN_MENU"
+
+
+
+		-- When switching to the Level1 Collection -- disable the Menu Panel Background and
+		-- the Menu; and load the Level1 Collection via its proxy
+	elseif message_id == hash("start_level1") then
+		msg.post("#level1_proxy", "load")
+		msg.post("#main_menu", "disable")
+
+
+		-- When switching to the Level2 Collection -- disable the Menu Panel Background and
+		-- the Menu; and load the Level2 Collection via its proxy
+	elseif message_id == hash("start_level2") then
+		msg.post("#level2_proxy", "load")
+		msg.post("#main_menu", "disable")	
+
+
+		-- Upon confirmation that a Level1 or Level2 collection has been loaded -- post messages
+		-- to set the current state, enable the level and initiate it
+	elseif message_id == hash("proxy_loaded") then
+		if sender == msg.url("#level1_proxy") then
+			msg.post(sender, "enable")
+			self.state = "GAME1_RUNNING"
+		end
+
+		if sender == msg.url("#level2_proxy") then
+			msg.post(sender, "enable")
+			self.state = "GAME2_RUNNING"
+		end
+
+	end    
+end

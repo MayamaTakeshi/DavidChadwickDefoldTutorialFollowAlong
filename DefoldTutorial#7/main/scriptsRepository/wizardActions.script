@@ -1,0 +1,93 @@
+--[[  Defold Tutorial #7:  Levels and Modules - 1024 x 768
+=============================================================================================
+
+Lua Script File:  	wizardActions.script
+
+Script Summary: Provides the general support functions related to Level 1 Game Activity.   
+
+-  	Controls the movement and animation associated with the wizard game object
+
+=============================================================================================
+--]]
+
+
+-- [  Local Functions
+
+local function play_animation(self, animation)
+	-- Plays the animation within input parameters, unless the same animation is already playing
+	if self.current_animation ~= animation then
+		self.current_animation = animation
+		msg.post("#wizardSprite", "play_animation", { id = animation })
+	end
+end
+
+-- [  Main Functions
+
+-- Initialization-----------------------------------------------------------------------------------
+function init(self)
+	-- Acquire Input Focus and set initial character movement speed to zero; set its position
+	msg.post(".", "acquire_input_focus")
+	self.speed = vmath.vector3(0, 0, 0)
+	go.set_position(vmath.vector3(250, 220, 0))
+
+	-- Set internal control for Animations
+	self.current_animation = hash("wizardIdle")
+end
+
+
+-- Final Shutdown-----------------------------------------------------------------------------------
+function final(self)
+	-- Release the Input Focus
+	msg.post(".", "release_input_focus")
+end
+
+
+-- Update-------------------------------------------------------------------------------------------
+function update(self, dt)
+
+	-- Bounce the Character x position off the Side Edges of the Game World
+	-- and keep the GameObject within a limited y range
+	if (go.get_position().x < 50) then
+		self.speed.x = 50
+	end
+
+	if (go.get_position().x > 950) then
+		self.speed.x = -50
+	end
+
+	if (go.get_position().y > 300) then
+		self.speed.y = -50
+	end
+
+	if (go.get_position().y < 50) then
+		self.speed.y = 50
+	end
+
+	-- Flip the sprite animation image when the x speed is negative
+	sprite.set_hflip("#wizardSprite", self.speed.x < 0)
+
+	-- Update the arrowMove Character's Postion based on speed and time since last update (dt)
+	go.set_position(go.get_position() + self.speed * dt)
+end
+
+
+-- onMessage----------------------------------------------------------------------------------------
+function on_message(self, message_id, message, sender)
+	-- Receive control messaging from the Level1 GUI and set speed & animation accordingly
+	if message_id == hash("moveWizardLeft") then
+		self.speed.x = -50
+		play_animation(self, hash("wizardWalk"))
+
+	elseif message_id == hash("moveWizardRight") then
+		self.speed.x = 50
+		play_animation(self, hash("wizardWalk"))
+
+	elseif message_id == hash("setWizardIdle") then
+		self.speed.x = 0
+		play_animation(self, hash("wizardIdle"))
+
+	else print("ERROR -- no message_id Received")
+
+end
+
+end
