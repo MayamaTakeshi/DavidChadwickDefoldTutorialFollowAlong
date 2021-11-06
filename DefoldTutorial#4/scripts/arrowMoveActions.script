@@ -1,0 +1,142 @@
+--[[  Defold Tutorial # 4:  Game Object Movement Techniques
+=============================================================================================
+
+Lua Script File:  arrowMoveActions.script
+
+Script Summary: This script provides the logic:
+
+(1)  Maps input actions from arrow keys to movement of the game object
+(2)	 Keeps the game object within the bounds of the game window
+(3)  Changes the animation between idle and walking depending upon status
+(4)  Using msg.post - displays user instructions on the screen
+
+=============================================================================================
+--]] 
+
+-- Declare Local Variables
+local HASH_LEFT = hash("left")
+local HASH_RIGHT = hash("right")
+local HASH_UP = hash("up")
+local HASH_DOWN = hash("down")
+
+-- Declare Local Function which plays animation unless that same animation is already playing
+local function play_animation(self, animation)
+	if self.current_animation ~= animation then
+		self.current_animation = animation
+		-- Send message to this character's sprite to start animation
+		msg.post("#sprite", "play_animation", { id = animation })
+	end
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- The init() function is executed when the game object is initialized
+-- ------------------------------------------------------------------------------------------
+function init(self)
+	-- Acquire Input Focus and set initial character speed to zero
+	msg.post(".", "acquire_input_focus")
+
+	-- Initialize the Starting Position for this Game Object
+	go.set_position(vmath.vector3(250, 125, 0))
+
+	-- Set a Script Properties
+	self.current_animation = hash("Wizard_Idle")	
+	self.speed = vmath.vector3(0, 0, 0)
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- The update() function is executed every frame
+-- ------------------------------------------------------------------------------------------
+function update(self, dt)
+	-- Place User Instructions at the bottom of Game World
+	msg.post("@render:", "draw_text", { text = "Use left/right/up/down arrow keys to move" 
+	.. " the Wizard", position = vmath.vector3(10, 25, 0) } )
+	msg.post("@render:", "draw_text", { text = "Wizard's go.get_position().x -- " 
+	.. math.floor(go.get_position().x), position = vmath.vector3(700, 40, 0) } )
+	msg.post("@render:", "draw_text", { text = "Wizard's go.get_position().y -- " 
+	.. math.floor(go.get_position().y), position = vmath.vector3(700, 25, 0) } )		
+
+	-- Bounce the Character x position a minimum of 50 pixels off the side edges of the 
+	-- Game World; keeping the Game Object within a limited y range
+
+	if (go.get_position().x < 50) then
+		self.speed.x = 50
+	end
+
+	if (go.get_position().x > 950) then
+		self.speed.x = -50
+	end
+
+	if (go.get_position().y > 300) then
+		self.speed.y = -50
+	end
+
+	if (go.get_position().y < 50) then
+		self.speed.y = 50
+	end
+
+	-- Flip the sprite animation image when the x speed is negative
+	sprite.set_hflip("#sprite", self.speed.x < 0)
+
+	-- Update the arrowMove Character's Postion based on speed and time since last update 
+	go.set_position(go.get_position() + self.speed * dt)
+end
+
+-- ------------------------------------------------------------------------------------------
+-- The on_input() function processes all input triggers (Key Triggers/Touch Events)
+-- ------------------------------------------------------------------------------------------
+
+function on_input(self, action_id, action)
+
+	-- Process the clicking of the LEFT Arrow Key
+	if action_id == HASH_LEFT then
+
+		-- When the Left Arrow is pressed, set the horizontal speed to a negative 50 
+		-- and set the animation to walking
+		if action.pressed then
+			self.speed.x = -50
+			play_animation(self, hash("wizard_walk"))
+
+			-- When the Left Arrow is released, set the horizontal speed to zero and 
+			-- set the animation to idle	
+		elseif action.released then
+			self.speed.x = 0
+			play_animation(self, hash("wizard_idle"))
+		end
+		return true
+
+		-- Process the clicking of the RIGHT Arrow Key
+	elseif action_id == HASH_RIGHT then
+		if action.pressed then
+			self.speed.x = 50
+			play_animation(self, hash("wizard_walk"))
+		elseif action.released then
+			self.speed.x = 0
+			play_animation(self, hash("wizard_idle"))
+		end
+		return true
+
+		-- Process the clicking of the UP Arrow Key
+	elseif action_id == HASH_UP then
+		if action.pressed then
+			self.speed.y = 50
+			play_animation(self, hash("wizard_walk"))
+		elseif action.released then
+			self.speed.y = 0
+			play_animation(self, hash("wizard_idle"))
+		end
+		return true
+
+		-- Process the clicking of the DOWN Arrow Key
+	elseif action_id == HASH_DOWN then
+		if action.pressed then
+			self.speed.y = -50
+			play_animation(self, hash("wizard_walk"))
+		elseif action.released then
+			self.speed.y = 0
+			play_animation(self, hash("wizard_idle"))
+		end
+		return true
+	end
+end

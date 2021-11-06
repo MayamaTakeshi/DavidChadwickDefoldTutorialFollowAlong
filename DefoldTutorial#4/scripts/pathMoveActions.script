@@ -1,0 +1,96 @@
+--[[  Defold Tutorial # 4:  Game Object Movement Techniques
+=============================================================================================
+
+Lua Script File:  pathMoveActions.script
+
+Script Summary: This script provides the logic:
+
+(1)  Moves the game object along a pre-defined path at a constant linear speed
+(2)	 Checks for proximity to the next waypoint before changing legs on the path
+(3)	 Displays User Instructions on the Screen
+
+=============================================================================================
+--]] 
+
+
+-- Declare Local Variables
+xPath = {100, 150, 625, 800, 800, 450, 100}		-- x positions along defined path
+yPath = {200, 700, 500, 650, 225, 475, 200}		-- y positions along defined path
+
+SPEED = 50										-- Movement Speed along path
+close = 15										-- Distance to waypoint 
+CLOSE_ENOUGH = 10								-- Tolerance to waypoint 
+
+WAYPOINT1 = 1									-- Waypoint traveling from
+WAYPOINT2 = 2									-- Waypoint traveling to
+
+
+-- ------------------------------------------------------------------------------------------
+-- The init() function is executed when the game object is initialized
+-- ------------------------------------------------------------------------------------------
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.speed = vmath.vector3(0, 0, 0)
+	go.set_position(vmath.vector3(xPath[1], yPath[1], 0))
+
+end
+
+
+-- ------------------------------------------------------------------------------------------
+-- The update() function is executed every frame
+-- ------------------------------------------------------------------------------------------
+function update(self, dt)
+
+	-- Draw the path to be followed by this character as defined by xPath/yPath Table
+	for i = 1, 6 do
+		startPt = vmath.vector3(xPath[i], yPath[i], 0)
+		endPt = vmath.vector3(xPath[i+1], yPath[i+1], 0)
+		msg.post("@render:", "draw_line", {
+			start_point = startPt, end_point = endPt, color = vmath.vector4(1, 1, 1, 1) } )
+		end
+
+		-- Move the Game Object along this path when distance to next waypoint is outside tolerance
+		if (close > CLOSE_ENOUGH) then
+
+			-- Compute incremental x and y speeds on each leg of path
+			dx = xPath[WAYPOINT2] - xPath[WAYPOINT1]
+			dy = yPath[WAYPOINT2] - yPath[WAYPOINT1]
+			dPath = math.sqrt(dx*dx + dy*dy)
+			speedX = (dx/dPath) * SPEED
+			speedY = (dy/dPath) * SPEED
+
+			-- Post current location to the screen
+			msg.post("@render:", "draw_text", { text = "Orkkey's go.get_position().x -- " .. math.floor(go.get_position().x), position = vmath.vector3(700, 100, 0) } )
+			msg.post("@render:", "draw_text", { text = "Orkkey's go.get_position().y -- " .. math.floor(go.get_position().y), position = vmath.vector3(700, 85, 0) } )
+
+			-- Modify Game Object Speed parameters
+			self.speed.x = speedX
+			self.speed.y = speedY
+
+			-- Update the pathMove Character's Position based on speed and time since last update (dt)
+			go.set_position(go.get_position() + self.speed * dt)
+
+		end
+
+		-- Determine if Game Object is at the end of this path leg
+		dx = xPath[WAYPOINT2] - go.get_position().x
+		dy = yPath[WAYPOINT2] - go.get_position().y
+		close = math.sqrt(dx*dx + dy*dy)
+
+		-- Reset based on reaching next Waypoint
+		if (close < CLOSE_ENOUGH) then
+
+			close = 15
+			WAYPOINT1 = WAYPOINT1 + 1
+			WAYPOINT2 = WAYPOINT2 + 1
+			go.set_position(vmath.vector3(xPath[WAYPOINT1], yPath[WAYPOINT1], 0))
+
+			-- Restart the Character moving around this path		
+			if WAYPOINT2 > 7 then
+				WAYPOINT1 = 1
+				WAYPOINT2 = 2
+			end
+
+		end
+
+	end
